@@ -10,9 +10,16 @@ $db.create_table :messages do
   String :body
 end
 
+$db.create_table :profiles do
+  primary_key :id
+  String :email
+  String :objective
+  
+end
+
 Pakyow::App.define do
   configure :global do
-    app.name = 'Pakyow Chat'
+    app.name = 'Wall Me'
   end
 
   middleware do |builder|
