@@ -1,21 +1,17 @@
 Pakyow::App.routes do
   default do
-    # redirect router.group(:message).path(:list)
+
     redirect router.group(:profile).path(:list)
   end
 
-  restful :message, '/messages' do
-    list do
-      view.partial(:form).scope(:message).bind({})
-      view.partial(:list).scope(:message).mutate(:list, with: data(:message).all).subscribe
-    end
+# For the Wall Me app
 
-    create do
-      data(:message).create(params[:message])
-      redirect router.group(:message).path(:list)
-    end
-  end
-
+# From a route, we can use the mutable to query for data:
+#  # get all the users
+#  data(:user).all
+#
+#  # get a specific user
+#  data(:user).find(1)
 
   restful :profile, '/profiles' do
     list do
@@ -24,6 +20,22 @@ Pakyow::App.routes do
     end
 
     create do
+      view.scope(:profile).bind({})
+      base_url = "https://api.fullcontact.com/v2/person.json?email="
+      # TODO: how to get access to :email prop in form to build url?
+      # email_str = view.scope(:profile).bind(:email)
+      email_str = "spearna@gmail.com"
+      conj_url = "&apiKey="
+      apiKey = "99b62982ad4384d4"
+      url = [base_url, email_str, conj_url, apiKey].join
+      # hashed_email = Digest::MD5.hexdigest(email)
+      # view.partial(:form).scope(:profile).bind()
+    	response = HTTParty.get(url)
+      result = JSON.parse(response.body)
+      # puts "first photo url:"
+      puts result['photos'][0]['url']
+    	image_url = result['photos'][0]['url']
+      view.scope(:profile).apply({:image => image_url})
       data(:profile).create(params[:profile])
       redirect router.group(:profile).path(:list)
     end

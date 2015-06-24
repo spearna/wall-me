@@ -2,19 +2,18 @@ require 'bundler/setup'
 
 require 'pakyow'
 require 'sequel'
+require 'httparty'
+require 'json'
 
 $db = Sequel.sqlite
-
-$db.create_table :messages do
-  primary_key :id
-  String :body
-end
 
 $db.create_table :profiles do
   primary_key :id
   String :email
   String :objective
-  
+  String :pic_url
+  String :name
+
 end
 
 Pakyow::App.define do
