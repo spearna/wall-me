@@ -11,7 +11,7 @@ $db.create_table :profiles do
   primary_key :id
   String :email
   String :objective
-  String :pic_url
+  String :image_url
   String :name
 
 end
