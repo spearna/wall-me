@@ -178,6 +178,13 @@ pw.node.propName = function (node) {
   return pw.node.propName(node.parentNode);
 }
 
+// returns the name of the version for node
+pw.node.versionName = function (node) {
+  if (node.hasAttribute('data-version')) {
+    return node.getAttribute('data-version');
+  }
+}
+
 // creates a context in which view manipulations can occur
 pw.node.with = function(node, cb) {
   cb.call(node);
@@ -733,34 +740,77 @@ pw_View.prototype.replace = function (view) {
   pw.node.replace(this.node, view.node);
 }
 
-pw_View.prototype.append = function (view) {
-  pw.node.append(this.node, view.node);
-}
+pw_View.prototype.append = function (view_or_data) {
+  if (view_or_data instanceof pw_View) {
+    pw.node.append(this.node, view_or_data.node);
+  } else {
+    this.fetchAndTransformView(function (view) {
+      view.bind(view_or_data);
+      this.after(view);
+    });
+  }
+};
 
-pw_View.prototype.prepend = function (view) {
-  pw.node.prepend(this.node, view.node);
-}
+pw_View.prototype.prepend = function (view_or_data) {
+  if (view_or_data instanceof pw_View) {
+    pw.node.prepend(this.node, view_or_data.node);
+  } else {
+    this.fetchAndTransformView(function (view) {
+      view.bind(view_or_data);
+      this.before(view);
+    });
+  }
+};
+
+pw_View.prototype.insert = function (view_or_data, atIndex) {
+  if (view_or_data instanceof pw_View) {
+    pw.node.insert(this.node, view_or_data.node, atIndex);
+  } else {
+    this.fetchAndTransformView(function (view) {
+      view.bind(view_or_data);
+      this.insert(view, atIndex);
+    });
+  }
+};
+
+pw_View.prototype.fetchAndTransformView = function (transformFn) {
+  var that = this;
+  //TODO build lookup
+  socket.fetchView({ component: 'chat', scope: 'message' }, function (view) {
+    transformFn.call(that, view);
+
+    if (that.versionName() == 'empty') {
+      that.remove();
+    }
+  });
+};
 
 pw_View.prototype.attrs = function () {
   return pw.attrs.init(this);
 };
 
 pw_View.prototype.scope = function (name) {
-  return _.map(pw.node.byAttr(this.node, 'data-scope', name), function (node) {
-    return pw.view.init(node);
-  });
+  return pw.collection.init(
+    _.reduce(pw.node.byAttr(this.node, 'data-scope', name), function (views, node) {
+      return views.concat(pw.view.init(node));
+    }, [])
+  );
 };
 
 pw_View.prototype.prop = function (name) {
-  return _.map(pw.node.byAttr(this.node, 'data-prop', name), function (node) {
-    return pw.view.init(node);
-  });
+  return pw.collection.init(
+    _.reduce(pw.node.byAttr(this.node, 'data-prop', name), function (views, node) {
+      return views.concat(pw.view.init(node));
+    }, [])
+  );
 };
 
 pw_View.prototype.component = function (name) {
-  return _.map(pw.node.byAttr(this.node, 'data-ui', name), function (node) {
-    return pw.view.init(node);
-  });
+  return pw.collection.init(
+    _.reduce(pw.node.byAttr(this.node, 'data-ui', name), function (views, node) {
+      return views.concat(pw.view.init(node));
+    }, [])
+  );
 };
 
 pw_View.prototype.with = function (cb) {
@@ -785,6 +835,10 @@ pw_View.prototype.bind = function (data, cb) {
 
 pw_View.prototype.apply = function (data, cb) {
   pw.node.apply(data, this.node, cb);
+};
+
+pw_View.prototype.versionName = function () {
+  return pw.node.versionName(this.node);
 };
 pw.collection = {};
 
@@ -876,12 +930,14 @@ pw_Collection.prototype.html = function(value) {
 };
 
 pw_Collection.prototype.append = function (data) {
+  if(!(data instanceof Array)) data = [data];
   var last = this.views[this.views.length - 1];
   this.views.push(last.append(data));
   return last;
 };
 
 pw_Collection.prototype.prepend = function(data) {
+  if(!(data instanceof Array)) data = [data];
   var firstView = this.views[0];
 
   var prependedViews = _.map(data, function (datum) {
@@ -893,27 +949,29 @@ pw_Collection.prototype.prepend = function(data) {
   return pw.collection.init(prependedViews);
 };
 
+//TODO insert
+
 pw_Collection.prototype.scope = function (name) {
   return pw.collection.init(
-    _.reduce(this.views, [], function (views, view) {
+    _.reduce(this.views, function (views, view) {
       return views.concat(view.scope(name));
-    })
+    }, [])
   );
 };
 
 pw_Collection.prototype.prop = function (name) {
   return pw.collection.init(
-    _.reduce(this.views, [], function (views, view) {
+    _.reduce(this.views, function (views, view) {
       return views.concat(view.prop(name));
-    })
+    }, [])
   );
 };
 
 pw_Collection.prototype.component = function (name) {
   return pw.collection.init(
-    _.reduce(this.views, [], function (views, view) {
+    _.reduce(this.views, function (views, view) {
       return views.concat(view.component(name));
-    })
+    }, [])
   );
 };
 
@@ -948,7 +1006,7 @@ pw_Collection.prototype.match = function (data, fn) {
       var channel = this.views[0].node.getAttribute('data-channel');
       var that = this;
 
-      window.socket.fetchView(channel, function (view) {
+      window.socket.fetchView({ channel: channel }, function (view) {
         _.each(data, function (datum) {
           if (!_.find(that.views, function (view) { return parseInt(view.node.getAttribute('data-id')) === datum.id })) {
             that.addView(view.clone());
@@ -1000,8 +1058,8 @@ pw.init.register(function () {
 
 pw.component = {};
 
-pw.component.init = function () {
-  return new pw_Component();
+pw.component.init = function (view, config) {
+  return new pw_Component(view, config);
 };
 
 // stores component functions by name
@@ -1021,37 +1079,37 @@ pw.component.findAndInit = function (node) {
     var name = uiNode.getAttribute('data-ui');
     var cfn = components[name];
 
-    if (cfn) {
-      var channel = uiNode.getAttribute('data-channel');
-      var config = uiNode.getAttribute('data-config');
-      var view = pw.view.init(uiNode);
+    var channel = uiNode.getAttribute('data-channel');
+    var config = uiNode.getAttribute('data-config');
+    var view = pw.view.init(uiNode);
 
+    if (cfn) {
       var component = new cfn(view, pw.component.buildConfigObject(config));
       component.config = config;
       component.view = view;
 
       pw.component.registerForChannel(component, channel);
     } else {
-      console.log('component not found: ' + name);
+      var component = new pw.component.init(view, pw.component.buildConfigObject(config));
+      pw.component.registerForChannel(component, channel);
     }
   });
 }
 
 pw.component.push = function (packet) {
   _.each(channelComponents[packet.channel], function (component) {
-    component.message(packet.channel, packet.payload);
+    if (packet.payload.instruct) {
+      component.instruct(packet.channel, packet.payload.instruct);
+    } else {
+      component.message(packet.channel, packet.payload);
+    }
   });
 }
 
 pw.component.register = function (name, fn) {
-  fn.prototype.listen = function (channel) {
-    pw.component.registerForChannel(this, channel);
-  }
-
-  fn.prototype.broadcast = function (payload, channel) {
-    pw.component.push({ payload: payload, channel: channel });
-  }
-
+  fn.prototype.listen    = pw_Component.prototype.listen;
+  fn.prototype.broadcast = pw_Component.prototype.broadcast;
+  fn.prototype.instruct  = pw_Component.prototype.instruct;
   components[name] = fn;
 }
 
@@ -1082,8 +1140,30 @@ pw.component.registerForChannel = function (component, channel) {
   pw_Component makes it possible to build custom controls.
 */
 
-var pw_Component = function (cfn, node) {
+var pw_Component = function (view, config) {
+  this.view = view;
+  this.config = config;
 }
+
+pw_Component.prototype.listen = function (channel) {
+  pw.component.registerForChannel(this, channel);
+};
+
+pw_Component.prototype.broadcast = function (payload, channel) {
+  pw.component.push({ payload: payload, channel: channel });
+};
+
+pw_Component.prototype.instruct = function (channel, instructions) {
+  var packet = {
+    payload: instructions,
+    channel: channel
+  };
+
+  pw.instruct.process(pw.collection.init(this.view), packet, window.socket);
+};
+
+pw_Component.prototype.message = function (channel, payload) {
+};
 /*
   Socket init.
 */
@@ -1226,12 +1306,12 @@ pw_Socket.prototype.reconnect = function () {
   }, self.socketWait);
 };
 
-pw_Socket.prototype.fetchView = function (channel, cb) {
+pw_Socket.prototype.fetchView = function (lookup, cb) {
   var uri = window.location.pathname + window.location.search;
 
   this.send({
     action: 'fetch-view',
-    channel: channel,
+    lookup: lookup,
     uri: uri
   }, function (res) {
     var e = document.createElement("div");
@@ -1254,7 +1334,7 @@ pw.instruct.process = function (collection, packet, socket) {
 };
 
 pw.instruct.fetchView = function (packet, socket, node) {
-  socket.fetchView(packet.channel, function (view) {
+  socket.fetchView({ channel: packet.channel }, function (view) {
     var parent = node.parentNode;
     parent.replaceChild(view.node, node);
 
@@ -1275,7 +1355,7 @@ pw.instruct.perform = function (collection, instructions) {
     if (collection[method]) {
       if (method == 'with' || method == 'for' || method == 'bind' || method == 'repeat' || method == 'apply') {
         collection[method].call(collection, value, function (datum) {
-          pw.instruct.perform(this, nested);
+          pw.instruct.perform(this, nested[value.indexOf(datum)]);
         });
         return;
       } else if (method == 'attrs') {
