@@ -1,10 +1,11 @@
 <div class="container margin-t">
   <div data-scope="profile">
 
-    <!-- TODO: image url is displayed first, once view refreshed the image displays -->
-    <div data-prop="imgurl">
-      image url
-      <!-- <img src="http://s3.amazonaws.com/37assets/svn/765-default-avatar.png" style="width:128px;height:128px" alt="some_text"> -->
+    <div>
+      <img data-prop="imgurl" style="width:90px; height:90px">
+      <!--
+      TODO: Add generic/funny profile image if not provided in JSON response
+      <img src="http://s3.amazonaws.com/37assets/svn/765-default-avatar.png" style="width:128px;height:128px" alt="some_text"> -->
     </div>
     <h3 data-prop="name">Name</h3>
     <p>
@@ -18,7 +19,7 @@
     <div data-scope="profile" data-version="empty">
       <hr>
       <p>
-        No one is here :(
+        No one is here :( <br> Let's change that ...
       </p>
     </div>
   </div>

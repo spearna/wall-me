@@ -45,13 +45,12 @@ Pakyow::App.routes do
         # p "Profile.all from Route Create:"
         # p Profile.all
         redirect router.group(:profile).path(:list)
+        #TODO: after record creation, re-autofocus form to email field
       else
         p "Couldn't find " + params[:profile][:email]
         #TODO: Output error to view
       end
 
     end #/create
-
   end #/restful
-
 end #/routes
