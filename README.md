@@ -1,24 +1,25 @@
-A web-based chat app written using PakyowUI. PakyowUI brings live updating views
-to Pakyow apps without moving logic to the client. Instead, PakyowUI apps are
-written in a traditional backend-driven style. *No JavaScript was required to
-build this example app (beyond the pakyow.js library bundled with PakyowUI).*
+A web-based, local check-in app based on the chat app written using PakyowUI.
+PakyowUI brings live updating views to Pakyow apps without moving logic to the
+client. Instead, PakyowUI apps are written in a traditional backend-driven
+style. *No JavaScript was required to build this example app (beyond the
+pakyow.js library bundled with PakyowUI).*
 
-Turn off JavaScript support in your browser and the app still retains its core 
-functionality (without the live updates of course). You get this progressive 
+Turn off JavaScript support in your browser and the app still retains its core
+functionality (without the live updates of course). You get this progressive
 enhancement for free, without thinking about it during development.
 
 Full documentation will be available soon, along with an official release!
 
 # Getting Started
 
-Make sure you have a reasonably recent version of Ruby installed (> 2.0), along 
+Make sure you have a reasonably recent version of Ruby installed (> 2.0), along
 with RubyGems and Bundler. Then, install the dependencies:
 
 		bundle install
 
 Next, start the app server:
 
-		bundle exec pakyow s
+		bundle exec pakyow server
 
 You'll find the app running at [http://localhost:3000](http://localhost:3000)!
 

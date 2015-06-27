@@ -1,13 +1,24 @@
 <div class="container margin-t">
-  <div data-scope="message">
-    <p data-prop="body">
-      Message Body Goes Here
-    </p>
-  </div>
+  <div data-scope="profile">
 
-  <div data-scope="message" data-version="empty">
+    <!-- TODO: image url is displayed first, once view refreshed the image displays -->
+    <div data-prop="imgurl">
+      image url
+      <!-- <img src="http://s3.amazonaws.com/37assets/svn/765-default-avatar.png" style="width:128px;height:128px" alt="some_text"> -->
+    </div>
+    <h3 data-prop="name">Name</h3>
     <p>
-      No messages found :(
-    </p>
+      <label>OBJECTIVE:
+        <span data-prop="objective">
+          Objective Goes Here
+        </span>
+      </p>
+    </div>
+
+    <div data-scope="profile" data-version="empty">
+      <hr>
+      <p>
+        No one is here :(
+      </p>
+    </div>
   </div>
-</div>
