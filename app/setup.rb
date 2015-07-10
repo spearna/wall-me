@@ -5,16 +5,16 @@ require 'sequel'
 require 'httparty'
 require 'json'
 
-$db = Sequel.sqlite
-
-$db.create_table :profiles do
-  primary_key :id
-  String :email
-  String :objective
-  String :imgurl
-  String :name
-
-end
+# $db = Sequel.sqlite
+#
+# $db.create_table :profiles do
+#   primary_key :id
+#   String :email
+#   String :objective
+#   String :imgurl
+#   String :name
+#
+# end
 
 Pakyow::App.define do
   configure :global do
@@ -27,6 +27,17 @@ Pakyow::App.define do
     Dotenv.load
 
     app.errors_in_browser = false
+
+    $db = Sequel.sqlite
+
+    $db.create_table :profiles do
+      primary_key :id
+      String :email
+      String :objective
+      String :imgurl
+      String :name
+
+    end
   end
 
   configure :prototype do
@@ -35,11 +46,28 @@ Pakyow::App.define do
   end
 
   configure :production do
+    require 'dotenv'
+    Dotenv.load
     # suggested production configuration
     app.static = true
     app.log_output = true
     app.auto_reload = false
     app.errors_in_browser = false
+
+    puts "Resetting the pg database."
+    database = ENV['DATABASE_URL'].split('/').last
+    `dropdb #{database}`
+    `createdb #{database}`
+
+    $db = Sequel.connect(ENV['DATABASE_URL'])
+    $db.create_table :profiles do
+      primary_key :id
+      String :email
+      String :objective
+      String :imgurl
+      String :name
+
+    end
   end
 
   middleware do |builder|
