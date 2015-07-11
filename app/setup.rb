@@ -5,16 +5,6 @@ require 'sequel'
 require 'httparty'
 require 'json'
 
-# $db = Sequel.sqlite
-#
-# $db.create_table :profiles do
-#   primary_key :id
-#   String :email
-#   String :objective
-#   String :imgurl
-#   String :name
-#
-# end
 
 Pakyow::App.define do
   configure :global do
@@ -40,12 +30,8 @@ Pakyow::App.define do
     end
   end
 
-  configure :prototype do
-    # an environment for running the front-end prototype with no backend
-    app.ignore_routes = true
-  end
-
-  configure :production do
+  configure :staging do
+    # an environment for running "production" locally with .env variales
     require 'dotenv'
     Dotenv.load
     # suggested production configuration
@@ -60,6 +46,26 @@ Pakyow::App.define do
     `createdb #{database}`
 
     $db = Sequel.connect(ENV['DATABASE_URL'])
+    $db.create_table :profiles do
+      primary_key :id
+      String :email
+      String :objective
+      String :imgurl
+      String :name
+
+    end
+  end
+
+  configure :production do
+    # suggested production configuration
+    app.static = true
+    app.log_output = true
+    app.auto_reload = false
+    app.errors_in_browser = false
+    realtime.redis = { url: ENV['REDIS_URL'] }
+
+    $db = Sequel.connect(ENV['DATABASE_URL'])
+    $db.run("DROP TABLE IF EXISTS profiles;")
     $db.create_table :profiles do
       primary_key :id
       String :email

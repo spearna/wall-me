@@ -1,4 +1,19 @@
 A web-based, local check-in app based on the chat app written using PakyowUI.
+
+PURPOSE:
+* Enter an email address and an objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Full Contact) and posts a "Profile" and the Objective.  This allows everyone at the event to see a name to a face, along with an objective so everyone can help that person get the best experience for the event.
+
+NEED: 
+* Will need a FullContact API developer key, entered in your .env file. 
+https://www.fullcontact.com/developer/docs/
+
+TODO's:
+* Front End:
+	* HTML styling: better gridding of displayed profiles; mobile friendly (responsive) layout. 
+* Back-end:
+	* Better error handling on JSON response (when email doesn't find contact info; either 202: Accepted or 404: Not Found).
+
+
 PakyowUI brings live updating views to Pakyow apps without moving logic to the
 client. Instead, PakyowUI apps are written in a traditional backend-driven
 style. *No JavaScript was required to build this example app (beyond the
