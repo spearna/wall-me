@@ -32,7 +32,14 @@ with RubyGems and Bundler. Then, install the dependencies:
 
 		bundle install
 
-Next, start the app server:
+Next, you'll need to define your FullContact developer api key in a file named
+`.env` in the root directory of the project. You can signup for a free account
+at the 
+[FullContact Developer API Signup](https://www.fullcontact.com/developer/pricing/) 
+page. Once you have your key, you can copy the `.env.template` file to `.env` and
+fill in your api key.
+
+Finally, start the app server:
 
 		bundle exec pakyow server
 
