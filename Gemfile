@@ -6,6 +6,7 @@ gem "sequel"
 gem "httparty"
 gem "json"
 gem "pg"
+gem "shotgun"
 
 group :development do
   gem "sqlite3"
