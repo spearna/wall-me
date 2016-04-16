@@ -1,11 +1,7 @@
 A web-based, local check-in app based on the chat app written using PakyowUI.
 
 PURPOSE:
-* Enter an email address and an objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Full Contact) and posts a "Profile" and the Objective.  This allows everyone at the event to see a name to a face, along with an objective so everyone can help that person get the best experience for the event.
-
-NEED: 
-* Will need a FullContact API developer key, entered in your .env file. 
-https://www.fullcontact.com/developer/docs/
+* Enter an email address and an objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Gravatar) and posts a "Profile" and the Objective.  This allows everyone at the event to see a name to a face, along with an objective so everyone can help that person get the best experience for the event.
 
 TODO's:
 * Front End:
@@ -31,13 +27,6 @@ Make sure you have a reasonably recent version of Ruby installed (> 2.0), along
 with RubyGems and Bundler. Then, install the dependencies:
 
 		bundle install
-
-Next, you'll need to define your FullContact developer api key in a file named
-`.env` in the root directory of the project. You can signup for a free account
-at the 
-[FullContact Developer API Signup](https://www.fullcontact.com/developer/pricing/) 
-page. Once you have your key, you can copy the `.env.template` file to `.env` and
-fill in your api key.
 
 Finally, start the app server:
 
