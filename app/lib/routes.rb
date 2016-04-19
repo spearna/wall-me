@@ -20,34 +20,19 @@ Pakyow::App.routes do
 
     create do
       #Getting email prop being submitted in form in profile view
-      email_str = params[:profile][:email]
-
-      #Building components of the API URL to Full Contact
-      base_url = "https://api.fullcontact.com/v2/person.json?email="
-      conj_url = "&apiKey="
-      apiKey = ENV['FULL_CONTACT_API_KEY']
-      # You can get a trial Full Contact API key from:
-      # https://www.fullcontact.com/developer/try-fullcontact/
-
-      url = [base_url, email_str, conj_url, apiKey].join
-
-      #Calling API to get JSON response for parsing
-      response = HTTParty.get(url)
-      result = JSON.parse(response.body)
+      profile = params[:profile]
+      gravatar = Gravatar.fetch(profile[:email])
 
       #If API response successful create record; else output error to view
-      if result['status'] == 200 then
-        image_url = result['photos'][0]['url']
-        name = result['contactInfo']['fullName']
-        # p "Inspect params in Route Create:"
-        # p params.inspect
-        data(:profile).create(params[:profile].merge(:name => name, :imgurl => image_url))
-        # p "Profile.all from Route Create:"
-        # p Profile.all
+      if gravatar then
+        profile.merge! name: gravatar.display_name, imgurl: gravatar.avatar_url
+
+        data(:profile).create(profile)
         redirect router.group(:profile).path(:list)
+
         #TODO: after record creation, re-autofocus form to email field
       else
-        p "Couldn't find " + params[:profile][:email]
+        p "Couldn't find #{profile[:email]}"
         #TODO: Output error to view
       end
 

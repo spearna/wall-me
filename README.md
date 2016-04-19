@@ -1,11 +1,18 @@
-A web-based, local check-in app based on the chat app written using PakyowUI.
+A web-based, local event check-in app to make it easier to mingle at an event. Based on the real-time chat app written using Pakyow.
 
 PURPOSE:
-* Enter an email address and an objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Full Contact) and posts a "Profile" and the Objective.  This allows everyone at the event to see a name to a face, along with an objective so everyone can help that person get the best experience for the event.
+* Enter email and objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Gravatar) and posts the Profile info (pic and name) and the Objective.  This allows everyone at the event to see a name to a face, along with an objective, so everyone can help that person get the best experience for the event.
 
-NEED: 
-* Will need a FullContact API developer key, entered in your .env file. 
-https://www.fullcontact.com/developer/docs/
+FEATURES:
+* Uses Gravatar to fetch profile info
+* If no profile found, option to upload info to Gravatar
+* Export list to spreadsheet
+* If pic not found, use funny pic as placeholder
+* If not mobile/notebook, auto scroll people on page.
+* [Future] Select category as Giver, Needer, Observer
+* [Future] Select subcategory in something like hardware, language, industry, etc (needs further thought)
+* [Future] Auto suggest first person to talk to; facilitate connection
+
 
 TODO's:
 * Front End:
@@ -14,6 +21,7 @@ TODO's:
 	* Better error handling on JSON response (when email doesn't find contact info; either 202: Accepted or 404: Not Found).
 
 
+From Pakyow:
 PakyowUI brings live updating views to Pakyow apps without moving logic to the
 client. Instead, PakyowUI apps are written in a traditional backend-driven
 style. *No JavaScript was required to build this example app (beyond the
@@ -23,7 +31,6 @@ Turn off JavaScript support in your browser and the app still retains its core
 functionality (without the live updates of course). You get this progressive
 enhancement for free, without thinking about it during development.
 
-Full documentation will be available soon, along with an official release!
 
 # Getting Started
 
@@ -32,28 +39,8 @@ with RubyGems and Bundler. Then, install the dependencies:
 
 		bundle install
 
-Next, you'll need to define your FullContact developer api key in a file named
-`.env` in the root directory of the project. You can signup for a free account
-at the 
-[FullContact Developer API Signup](https://www.fullcontact.com/developer/pricing/) 
-page. Once you have your key, you can copy the `.env.template` file to `.env` and
-fill in your api key.
-
 Finally, start the app server:
 
 		bundle exec pakyow server
 
 You'll find the app running at [http://localhost:3000](http://localhost:3000)!
-
-# Next Steps
-
-Read more about the two new libraries:
-
-- [PakyowUI](https://github.com/pakyow/pakyow/tree/master/pakyow-ui)
-- [Pakyow.js](https://github.com/pakyow/pakyow-js)
-
-Want to keep up with the latest development? Follow along:
-
-- [Gitter](https://gitter.im/pakyow/chat)
-- [Mailing List](http://eepurl.com/_NLlD)
-- [Twitter](http://twitter.com/pakyow)
