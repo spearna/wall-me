@@ -1,5 +1,8 @@
 A web-based, local event check-in app to make it easier to mingle at an event. Based on the real-time chat app written using Pakyow.
 
+Wireframe found here:
+http://framebox.org/xUFd
+
 PURPOSE:
 * Enter email and objective for attending the event. The app finds profile information based on that email address, grabs a picture and a name from an API response (from Gravatar) and posts the Profile info (pic and name) and the Objective.  This allows everyone at the event to see a name to a face, along with an objective, so everyone can help that person get the best experience for the event.
 
