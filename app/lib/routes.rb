@@ -14,16 +14,24 @@ Pakyow::App.routes do
 
   restful :profile, '/profiles' do
     list do
-      view.partial(:form).scope(:profile).bind({})
+      # Building view using data-version in _form.html to display short_form
+      #  unless email lookup can't be found
+
+      #TODO: Handle switching from short form to long if Gravatar can't find info
+      view.partial(:form).scope(:profile).use(:short_form).bind({})
+
+      # This is original view composition without data-versioning
+      # view.partial(:form).scope(:profile).bind({})
+
       view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
     end
 
     create do
-      #Getting email prop being submitted in form in profile view
+      # Getting email prop being submitted in form in profile view
       profile = params[:profile]
       gravatar = Gravatar.fetch(profile[:email])
 
-      #If API response successful create record; else output error to view
+      # If API response successful create record; else output error to view
       if gravatar then
         profile.merge! name: gravatar.display_name, imgurl: gravatar.avatar_url
 
