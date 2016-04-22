@@ -1,5 +1,15 @@
-<form data-scope="profile" data-ui="mutable">
+# Short form is used for Gravatar lookup
+<form data-scope="profile" data-version="short_form" data-ui="mutable">
   <input data-prop="email" type="email" placeholder="Your Email" autofocus required>
   <input data-prop="objective" type="text" placeholder="Your objective today">
+  <input type="submit" value="Send">
+</form>
+
+# Long form is used if Gravatar can't find info for email, require name put in manually
+<form data-scope="profile" data-version="long_form" data-default data-ui="mutable">
+  <input data-prop="email" type="email" placeholder="Your Email" autofocus required>
+  <input data-prop="objective" type="text" placeholder="Your objective today">
+  <input type="text" placeholder="First Name">
+  <input type="text" placeholder="Last Name">
   <input type="submit" value="Send">
 </form>
