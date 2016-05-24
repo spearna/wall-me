@@ -21,14 +21,13 @@ Pakyow::App.routes do
     if flash and flash["profile"]
       profile = flash['profile']
       profile['form_type'] = :long_form
-      view.partial(:form).scope(:error).bind({text: 'An error occurred'})
     end
 
     view.partial(:form).scope(:profile).mutate(:render_form, with: profile).subscribe
     view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
   end
 
-  post '/', after: [:flash_after] do
+  post '/' do
     profile = params[:profile]
 
     if profile["firstName"]
