@@ -14,20 +14,17 @@ Pakyow::App.routes do
     end
   end
 
-  fn :flash_after do
-    puts "HEY I GOT HERE"
-  end
-
   get '/', before: [:flash] do
     flash = request.flash
+    profile = {}
 
     if flash and flash["profile"]
-      view.partial(:form).scope(:profile).use(:long_form).bind(flash["profile"])
+      profile = flash['profile']
+      profile['form_type'] = :long_form
       view.partial(:form).scope(:error).bind({text: 'An error occurred'})
-    else
-      view.partial(:form).scope(:profile).use(:short_form).bind({})
     end
 
+    view.partial(:form).scope(:profile).mutate(:render_form, with: profile).subscribe
     view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
   end
 
@@ -52,7 +49,7 @@ Pakyow::App.routes do
       end
     end
 
-    redirect '/'
+    reroute '/', :get
   end
 
 end #/routes
