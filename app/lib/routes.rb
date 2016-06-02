@@ -20,10 +20,21 @@ Pakyow::App.routes do
 
     if flash and flash["profile"]
       profile = flash['profile']
-      profile['form_type'] = :long_form
+    end
+    
+    view.partial(:short_form).scope(:profile).apply(profile)
+    view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+  end
+
+  get '/long_form', before: [:flash] do
+    flash = request.flash
+    profile = {}
+
+    if flash and flash["profile"]
+      profile = flash["profile"]
     end
 
-    view.partial(:form).scope(:profile).mutate(:render_form, with: profile).subscribe
+    view.partial(:long_form).scope(:profile).apply(profile)
     view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
   end
 
@@ -45,10 +56,11 @@ Pakyow::App.routes do
         data(:profile).create(profile)
       else
         session[:flash] = {profile: profile}.to_json
+        redirect '/long_form'
       end
     end
 
-    reroute '/', :get
+    redirect '/'
   end
 
 end #/routes
