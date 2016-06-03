@@ -1,4 +1,7 @@
-var pw = {};
+var pw = {
+  version: '0.2.4'
+};
+
 (function() {
 pw.util = {
   guid: function () {
@@ -35,7 +38,7 @@ pw.node = {
     if (node.tagName === 'INPUT') {
       if (node.type === 'checkbox') {
         if (node.checked) {
-          return node.name ? node.name : true;
+          return node.value ? node.value : true;
         } else {
           return false;
         }
@@ -43,6 +46,8 @@ pw.node = {
 
       return node.value;
     } else if (node.tagName === 'TEXTAREA') {
+      return node.value;
+    } else if (node.tagName === 'SELECT') {
       return node.value;
     }
 
@@ -137,7 +142,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.inForm(next);
     }
   },
@@ -149,7 +154,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.component(next);
     }
   },
@@ -161,7 +166,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.scope(next);
     }
   },
@@ -173,7 +178,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.scopeName(next);
     }
   },
@@ -185,7 +190,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.prop(next);
     }
   },
@@ -197,7 +202,7 @@ pw.node = {
     }
 
     var next = node.parentNode;
-    if (next !== document) {
+    if (next && next !== document) {
       return pw.node.propName(next);
     }
   },
@@ -210,11 +215,11 @@ pw.node = {
   },
 
   // creates a context in which view manipulations can occur
-  with: function(node, cb) {
+  invoke: function(node, cb) {
     cb.call(node);
   },
 
-  for: function(node, data, cb) {
+  invokeWithData: function(node, data, cb) {
     if (pw.node.isNodeList(node)) {
       node = pw.node.toA(node);
     }
@@ -252,14 +257,14 @@ pw.node = {
   },
 
   repeat: function(node, data, cb) {
-    pw.node.for(pw.node.match(node, data), data, cb);
+    pw.node.invokeWithData(pw.node.match(node, data), data, cb);
   },
 
   // binds an object to a node
   bind: function (data, node, cb) {
     var scope = pw.node.findBindings(node)[0];
 
-    pw.node.for(node, data, function(dm) {
+    pw.node.invokeWithData(node, data, function(dm) {
       if (!dm) {
         return;
       }
@@ -381,10 +386,10 @@ pw.node = {
       } else {
         node.checked = false;
       }
+    } else if (node.tagName === 'TEXTAREA' || pw.node.isSelfClosingTag(node)) {
+      node.value = value;
     } else {
-      if (pw.node.isSelfClosingTag(node)) {
-        node.value = value;
-      } else {
+      if (value) {
         node.innerHTML = value;
       }
     }
@@ -437,12 +442,26 @@ pw.node = {
         value = value.join(' ');
       }
 
+      if (attr === 'checked') {
+        if (value) {
+          value = 'checked';
+        } else {
+          value = '';
+        }
+
+        node.checked = value;
+      }
+
       node.setAttribute(attr, value);
     }
   },
 
   all: function (node) {
     var arr = [];
+
+    if (!node) {
+      return arr;
+    }
 
     if(document !== node) {
       arr.push(node);
@@ -490,6 +509,52 @@ pw.node = {
 
   toA: function (nodeSet) {
     return Array.prototype.slice.call(nodeSet);
+  },
+
+  serialize: function (node) {
+    var json = {};
+    var working;
+    var value;
+    var split, last;
+    var previous, previous_name;
+    node.querySelectorAll('input, select, textarea').forEach(function (input) {
+      working = json;
+      split = input.name.split('[');
+      last = split[split.length - 1];
+      split.forEach(function (name) {
+        value = pw.node.value(input);
+
+        if (name == ']') {
+          if (!(previous[previous_name] instanceof Array)) {
+            previous[previous_name] = [];
+          }
+
+          if (value) {
+            previous[previous_name].push(value);
+          }
+        }
+
+        if (name != last) {
+          value = {};
+        }
+
+        name = name.replace(']', '');
+
+        if (name == '' || name == '_method') {
+          return;
+        }
+
+        if (!working[name]) {
+          working[name] = value;
+        }
+
+        previous = working;
+        previous_name = name;
+        working = working[name];
+      });
+    });
+
+    return json;
   }
 };
 pw.attrs = {
@@ -612,10 +677,6 @@ pw.state = {
   build: function (sigArr, parentObj) {
     var nodeState;
     return sigArr.reduce(function (acc, sig) {
-      // if (sig[0].node.getAttribute('data-version') === 'empty') {
-      //   return acc;
-      // }
-
       if (nodeState = pw.state.buildForNode(sig, parentObj)) {
         acc.push(nodeState);
       }
@@ -666,6 +727,12 @@ pw_State.prototype = {
 
   // gets the current represented state from the node and diffs it with the current state
   diffNode: function (node) {
+    if (node.hasAttribute('data-ui')) {
+      return {
+        '__nested': pw.state.build(pw.node.significant(node))
+      };
+    }
+
     return pw.state.build(pw.node.significant(pw.node.scope(node)))[0];
   },
 
@@ -699,7 +766,7 @@ pw_State.prototype = {
     this.snapshots.push(copy);
   },
 
-  delete: function (state) {
+  remove: function (state) {
     var copy = this.copy();
     var match = copy.find(function (s) {
       return s.id === state.id;
@@ -734,8 +801,15 @@ pw.view = {
   },
 
   fromStr: function (str) {
-    var e = document.createElement("div");
+    var nodeType = 'div';
+
+    if (str.match(/^<tr/) || str.match(/^<tbody/)) {
+      nodeType = 'table';
+    }
+
+    var e = document.createElement(nodeType);
     e.innerHTML = str;
+
     return pw.view.init(e.childNodes[0]);
   }
 };
@@ -776,33 +850,20 @@ pw_View.prototype = {
       }, []), this);
   },
 
-  //FIXME really this is getting the template, which we've implemented in collection
-  // fetchAndTransformView: function (transformFn) {
-  //   var that = this;
-  //   //TODO build query rather than hardcode chat + message
-  //   socket.fetchView({ component: 'chat', scope: 'message' }, function (view) {
-  //     transformFn.call(that, view);
-
-  //     if (that.versionName() == 'empty') {
-  //       that.remove();
-  //     }
-  //   });
-  // },
-
   attrs: function () {
     return pw.attrs.init(this);
   },
 
-  with: function (cb) {
-    pw.node.with(this.node, cb);
+  invoke: function (cb) {
+    pw.node.invoke(this.node, cb);
   },
 
   match: function (data) {
     pw.node.match(this.node, data);
   },
 
-  for: function (data, cb) {
-    pw.node.for(this.node, data, cb);
+  invokeWithData: function (data, cb) {
+    pw.node.invokeWithData(this.node, data, cb);
   },
 
   repeat: function (data, cb) {
@@ -815,6 +876,41 @@ pw_View.prototype = {
 
   apply: function (data, cb) {
     pw.node.apply(data, this.node, cb);
+  },
+
+  use: function (version, cb) {
+    var self = this;
+
+    if (this.node.getAttribute('data-version') != version) {
+      this.node.setAttribute('data-version', version);
+
+      var lookup = {
+        scope: this.node.getAttribute('data-scope'),
+        version: version
+      };
+
+      window.socket.fetchView(lookup, function (view) {
+        view.node.setAttribute('data-channel', self.node.getAttribute('data-channel'));
+        pw.node.replace(self.node, view.node);
+        self.node = view.node;
+        cb();
+      });
+    } else {
+      cb();
+    }
+  },
+
+  setEndpoint: function (endpoint) {
+    this.endpoint = endpoint;
+    return this;
+  },
+
+  first: function () {
+    return this;
+  },
+
+  length: function () {
+    return 1;
   }
 };
 
@@ -829,7 +925,7 @@ pw_View.prototype = {
 });
 
 // pass through functions without view
-['remove', 'clear', 'versionNode'].forEach(function (method) {
+['remove', 'clear', 'versionName'].forEach(function (method) {
   pw_View.prototype[method] = function () {
     return pw.node[method](this.node);
   };
@@ -841,23 +937,6 @@ pw_View.prototype = {
     return pw.node[method](this.node, view.node);
   };
 });
-
-// // functions that handle views differently than data
-// [['append', 'after'], ['prepend', 'before'], ['insert', 'insert']].forEach(function (tuple) {
-//   var v_method = tuple[0];
-//   var d_method = tuple[1];
-
-//   pw_View.prototype[v_method] = function (view_or_data) {
-//     // if (view_or_data instanceof pw_View) {
-//       pw.node[v_method](this.node, view_or_data.node);
-//     // } else {
-//     //   this.fetchAndTransformView(function (view) {
-//     //     view.bind(view_or_data);
-//     //     this[d_method](view);
-//     //   });
-//     // }
-//   };
-// });
 pw.collection = {
   init: function (view_or_views, parent, scope) {
     if (view_or_views instanceof pw_Collection) {
@@ -879,10 +958,16 @@ pw.collection = {
 var pw_Collection = function (views, parent, scope) {
   this.views = views;
   this.parent = parent;
-  this.scope = scope;
+  this._scope = scope;
 };
 
 pw_Collection.prototype = {
+  clone: function () {
+    return pw.collection.init(this.views.map(function (view) {
+      return view.clone();
+    }));
+  },
+
   last: function () {
     return this.views[this.length() - 1];
   },
@@ -899,28 +984,45 @@ pw_Collection.prototype = {
     }
   },
 
-  addView: function(view) {
-    if (this.length() > 0) {
-      pw.node.after(this.last().node, view.node);
-    } else if (this.parent) {
-      this.parent.append(view);
+  addView: function(view_or_views) {
+    var views = [];
+
+    if (view_or_views instanceof pw_Collection) {
+      views = view_or_views.views;
+    } else {
+      views.push(view_or_views);
     }
 
-    pw.component.findAndInit(view.node);
+    if (this.length() > 0) {
+      views.forEach(function (view) {
+        pw.node.after(this.last().node, view.node);
+      }, this);
+    } else if (this.parent) {
+      views.forEach(function (view) {
+        this.parent.append(view);
+      }, this);
+    }
 
-    this.views.push(view);
+    this.views = this.views.concat(views);
   },
 
   order: function (orderedIds) {
-    var match;
-
     orderedIds.forEach(function (id) {
+      if (!id) {
+        return;
+      }
+
       var match = this.views.find(function (view) {
-        return parseInt(view.node.getAttribute('data-id')) === id;
+        return view.node.getAttribute('data-id') == id.toString();
       });
 
       if (match) {
         match.node.parentNode.appendChild(match.node);
+
+        // also reorder the list of views
+        var i = this.views.indexOf(match);
+        this.views.splice(i, 1);
+        this.views.push(match);
       }
     }, this);
   },
@@ -955,11 +1057,11 @@ pw_Collection.prototype = {
     return pw.collection.init(prependedViews);
   },
 
-  with: function (cb) {
-    pw.node.with(this.views, cb);
+  invoke: function (cb) {
+    pw.node.invoke(this.views, cb);
   },
 
-  for: function(data, fn) {
+  invokeWithData: function(data, fn) {
     data = Array.ensure(data);
 
     this.views.forEach(function (view, i) {
@@ -974,34 +1076,57 @@ pw_Collection.prototype = {
       this.remove();
       return fn.call(this);
     } else {
-      this.views.forEach(function (view) {
+      var firstView;
+      var firstParent;
+
+      if (this.views[0]) {
+        firstView = this.views[0].clone();
+        firstParent = this.views[0].node.parentNode;
+      }
+
+      this.views.slice(0).forEach(function (view) {
         var id = view.node.getAttribute('data-id');
 
-        if (!id) {
-          return;
-        }
-
-        if (!data.find(function (datum) { return datum.id.toString() === id })) {
+        if (!id && data[0].id) {
           this.removeView(view);
+          return;
+        } else if (id) {
+          if (!data.find(function (datum) { return datum.id && datum.id.toString() === id })) {
+            this.removeView(view);
+          }
         }
       }, this);
 
       if (data.length > this.length()) {
         var self = this;
         this.endpoint.template(this, function (view) {
+          if (!view) {
+            view = firstView.clone();
+            self.parent = pw.view.init(firstParent);
+          }
+
           data.forEach(function (datum) {
             if (!self.views.find(function (view) {
               return view.node.getAttribute('data-id') === (datum.id || '').toString()
             })) {
-              self.addView(view.clone());
+              var viewToAdd = view.clone();
+
+              if (viewToAdd instanceof pw_Collection) {
+                viewToAdd = viewToAdd.views[0];
+              }
+
+              viewToAdd.node.setAttribute('data-id', datum.id);
+              self.addView(viewToAdd);
+
+              pw.component.findAndInit(viewToAdd.node);
             }
           }, self);
 
           return fn.call(self);
         });
+      } else {
+        return fn.call(this);
       }
-
-      return fn.call(this);
     }
 
     return this;
@@ -1009,12 +1134,12 @@ pw_Collection.prototype = {
 
   repeat: function (data, fn) {
     this.match(data, function () {
-      this.for(data, fn);
+      this.invokeWithData(data, fn);
     });
   },
 
   bind: function (data, fn) {
-    this.for(data, function(datum) {
+    this.invokeWithData(data, function(datum) {
       this.bind(datum);
 
       if(!(typeof fn === 'undefined')) {
@@ -1027,17 +1152,26 @@ pw_Collection.prototype = {
 
   apply: function (data, fn) {
     this.match(data, function () {
-      this.bind(data, fn);
       var id;
+
       this.order(data.map(function (datum) {
         if (id = datum.id) {
           return id.toString();
         }
       }));
+
+      this.bind(data, fn);
     });
   },
 
-  endpoint: function (endpoint) {
+  version: function (data, fn) {
+    var self = this;
+    this.match(data, function () {
+      this.invokeWithData(data, fn);
+    });
+  },
+
+  setEndpoint: function (endpoint) {
     this.endpoint = endpoint;
     return this;
   }
@@ -1048,7 +1182,7 @@ pw_Collection.prototype = {
   pw_Collection.prototype[method] = function (name) {
     return pw.collection.init(
       this.views.reduce(function (views, view) {
-        return views.concat(view[method](name));
+        return views.concat(view[method](name).views);
       }, [])
     );
   };
@@ -1081,6 +1215,9 @@ var components = {};
 var channelComponents = {};
 var channelBroadcasts = {};
 
+// component instances
+var componentInstances = {};
+
 pw.component = {
   init: function (view, config) {
     return new pw_Component(view, config);
@@ -1092,17 +1229,29 @@ pw.component = {
 
   findAndInit: function (node) {
     pw.node.byAttr(node, 'data-ui').forEach(function (uiNode) {
+      if (uiNode._ui) {
+        return;
+      }
+
       var name = uiNode.getAttribute('data-ui');
       var cfn = components[name] || pw.component.init;
+
+      if (!componentInstances[name]) {
+        componentInstances[name] = [];
+      }
 
       var channel = uiNode.getAttribute('data-channel');
       var config = uiNode.getAttribute('data-config');
       var view = pw.view.init(uiNode);
+      var id = componentInstances[name].length;
 
-      var component = new cfn(view, pw.component.buildConfigObject(config), name);
+      var component = new cfn(view, pw.component.buildConfigObject(config), name, id);
       component.init(view, config, name);
 
       pw.component.registerForChannel(component, channel);
+      componentInstances[name].push(component);
+
+      uiNode._ui = true;
     });
   },
 
@@ -1159,6 +1308,17 @@ pw.component = {
     channelBroadcasts[channel].push([cb, component]);
   },
 
+  deregisterForBroadcast: function (channel, component) {
+    var components = channelBroadcasts[channel];
+
+    var instanceTuple = components.find(function (tuple) {
+      return tuple[1] == component;
+    });
+
+    var i = components.indexOf(instanceTuple);
+    components.splice(i, 1);
+  },
+
   broadcast: function (channel, payload) {
     (channelBroadcasts[channel] || []).forEach(function (cbTuple) {
       cbTuple[0].call(cbTuple[1], payload);
@@ -1185,12 +1345,19 @@ pw_Component.prototype = {
     var self = this;
 
     // setup templates
-    pw.node.toA(node.querySelectorAll('*[data-template]')).forEach(function (templateNode) {
+    pw.node.toA(node.querySelectorAll(':scope > *[data-template]')).forEach(function (templateNode) {
       var cloned = templateNode.cloneNode(true);
       pw.node.remove(templateNode);
 
+      var scope = cloned.getAttribute('data-scope');
+
+      if (this.templates[scope]) {
+        this.templates[scope].views.push(pw.view.init(cloned));
+      } else {
+        this.templates[scope] = pw.collection.init(pw.view.init(cloned));
+      }
+
       cloned.removeAttribute('data-template');
-      this.templates[cloned.getAttribute('data-scope')] = cloned;
     }, this);
 
     // setup our initial state
@@ -1211,8 +1378,12 @@ pw_Component.prototype = {
 
     // make it mutable
     var mutableCb = function (evt) {
-      evt.preventDefault();
-      self.mutated(pw.node.scope(evt.target));
+      var scope = pw.node.scope(evt.target);
+
+      if (scope) {
+        evt.preventDefault();
+        self.mutated(scope);
+      }
     };
 
     node.addEventListener('submit', mutableCb);
@@ -1223,10 +1394,45 @@ pw_Component.prototype = {
     });
 
     //TODO define other mutable things
+
+    if (this.inited) {
+      this.inited();
+    }
   },
 
   listen: function (channel, cb) {
     pw.component.registerForBroadcast(channel, cb, this);
+  },
+
+  ignore: function (channel) {
+    pw.component.deregisterForBroadcast(channel, this);
+  },
+
+  // Bubbles an event up to a parent component. Intended to be used
+  // as an alternative to `broadcast` in cases where child components
+  // have an impact on their parents.
+  bubble: function (channel, payload) {
+    var parentComponent = pw.node.component(this.node.parentNode);
+
+    (channelBroadcasts[channel] || []).forEach(function (cbTuple) {
+      if (cbTuple[1].node == parentComponent) {
+        cbTuple[0].call(cbTuple[1], payload);
+      }
+    });
+  },
+
+  // Trickles an event down to child components. Intended to be used
+  // as an alternative to `broadcast` in cases where parent components
+  // have an impact on their children.
+  trickle: function (channel, payload) {
+    var channels = (channelBroadcasts[channel] || []);
+    pw.node.toA(this.node.getElementsByTagName('*')).forEach(function (node) {
+      channels.forEach(function (cbTuple) {
+        if (cbTuple[1].node == node) {
+          cbTuple[0].call(cbTuple[1], payload);
+        }
+      });
+    })
   },
 
   //TODO this is pretty similary to processing instructions
@@ -1276,12 +1482,16 @@ pw_Component.prototype = {
   },
 
   transform: function (state) {
+    this._transform(state);
+  },
+
+  _transform: function (state) {
     if (!state) {
       return;
     }
 
     if (state.length > 0) {
-      this.view.scope(state[0].scope).endpoint(this.endpoint || this).apply(state);
+      this.view.scope(state[0].scope).setEndpoint(this.endpoint || this).apply(state);
     } else {
       pw.node.breadthFirst(this.view.node, function () {
         if (this.hasAttribute('data-scope')) {
@@ -1305,12 +1515,12 @@ pw_Component.prototype = {
     var template;
 
     if (template = this.templates[view.scope]) {
-      cb(pw.view.init(template.cloneNode(true)));
+      cb(template);
     }
   },
 
-  delete: function (data) {
-    this.state.delete(data);
+  remove: function (data) {
+    this.state.remove(data);
     this.transform(this.state.current());
   },
 
@@ -1344,6 +1554,7 @@ pw.init.register(function () {
   pw.socket.init({
     cb: function (socket) {
       window.socket = socket;
+      pw.component.broadcast('socket:available');
     }
   });
 });
@@ -1403,9 +1614,13 @@ var pw_Socket = function (url, cb) {
 
   this.ws = new WebSocket(url);
 
-  this.id = url.split('socket_connection_id=')[1]
+  this.id = url.split('socket_connection_id=')[1];
+
+  var pingInterval;
 
   this.ws.onmessage = function (evt) {
+    pw.component.broadcast('socket:loaded');
+
     var data = JSON.parse(evt.data);
     if (data.id) {
       var cb = self.callbacks[data.id];
@@ -1420,6 +1635,7 @@ var pw_Socket = function (url, cb) {
 
   this.ws.onclose = function (evt) {
     console.log('socket closed');
+    clearInterval(pingInterval);
     self.reconnect();
   };
 
@@ -1429,11 +1645,17 @@ var pw_Socket = function (url, cb) {
     if(self.initCb) {
       self.initCb(self);
     }
+
+    pingInterval = setInterval(function () {
+      self.send({ action: 'ping' });
+    }, 30000);
   }
 };
 
 pw_Socket.prototype = {
   send: function (message, cb) {
+    pw.component.broadcast('socket:loading');
+
     message.id = pw.util.guid();
     if (!message.input) {
       message.input = {};
@@ -1450,7 +1672,7 @@ pw_Socket.prototype = {
 
     var selector = '*[data-channel="' + packet.channel + '"]';
 
-    if (packet.channel.split(':')[0] === 'component') {
+    if (packet.channel && packet.channel.split(':')[0] === 'component') {
       pw.component.push(packet);
       return;
     }
@@ -1484,7 +1706,15 @@ pw_Socket.prototype = {
   },
 
   fetchView: function (lookup, cb) {
-    var uri = window.location.pathname + window.location.search;
+    var uri;
+
+    if (window.location.hash) {
+      var arr = window.location.hash.split('#:')[1].split('/');
+      arr.shift();
+      uri = arr.join('/');
+    } else {
+      uri = window.location.pathname + window.location.search;
+    }
 
     this.send({
       action: 'fetch-view',
@@ -1492,8 +1722,13 @@ pw_Socket.prototype = {
       uri: uri
     }, function (res) {
       var view = pw.view.fromStr(res.body);
-      view.node.removeAttribute('data-id');
-      cb(view);
+
+      if (view.node) {
+        view.node.removeAttribute('data-id');
+        cb(view);
+      } else {
+        cb();
+      }
     });
   }
 };
@@ -1508,24 +1743,39 @@ pw.instruct = {
 
   fetchView: function (packet, socket, node) {
     socket.fetchView({ channel: packet.channel }, function (view) {
-      var parent = node.parentNode;
-      parent.replaceChild(view.node, node);
+      if (view) {
+        var parent = node.parentNode;
+        parent.replaceChild(view.node, node);
 
-      var selector = '*[data-channel="' + packet.channel + '"]';
-      var nodes = pw.node.toA(parent.querySelectorAll(selector));
-      pw.instruct.perform(pw.collection.fromNodes(nodes, selector), packet.payload);
+        var selector = '*[data-channel="' + packet.channel + '"]';
+        var nodes = pw.node.toA(parent.querySelectorAll(selector));
+        pw.instruct.perform(pw.collection.fromNodes(nodes, selector), packet.payload);
+      } else {
+        console.log('trouble fetching view :(');
+      }
     });
   },
 
+  // TODO: make this smart and cache results, invalidating
+  // if the websocket connection reconnects (since that means
+  // the server probably restarted)
   template: function (view, cb) {
     var lookup = {};
+
+    if (!view || !view.first()) {
+      return cb();
+    }
+
     var node = view.first().node;
 
     if (node.hasAttribute('data-channel')) {
       lookup.channel = view.first().node.getAttribute('data-channel');
-    } else {
+    } else if (node.hasAttribute('data-ui') && node.hasAttribute('data-scope')) {
       lookup.component = pw.node.component(node).getAttribute('data-ui');
       lookup.scope = node.getAttribute('data-scope');
+    } else {
+      cb();
+      return;
     }
 
     window.socket.fetchView(lookup, function (view) {
@@ -1533,22 +1783,45 @@ pw.instruct = {
     });
   },
 
-  perform: function (collection, instructions) {
+  perform: function (collection, instructions, cb) {
     var self = this;
+    instructions = instructions || [];
 
-    (instructions || []).forEach(function (instruction, i) {
+    function instruct (subject, instruction) {
       var method = instruction[0];
       var value = instruction[1];
       var nested = instruction[2];
 
+      // remap instructions to the ring name
+      if (method === 'with') {
+        method = 'invoke';
+      }
+
+      if (method === 'for') {
+        method = 'invokeWithData';
+      }
+
       if (collection[method]) {
-        if (method == 'with' || method == 'for' || method == 'bind' || method == 'repeat' || method == 'apply') {
-          collection.endpoint(self)[method].call(collection, value, function (datum) {
-            pw.instruct.perform(this, nested[value.indexOf(datum)]);
+        if (method == 'invoke' || method == 'invokeWithData' || method == 'bind' || method == 'repeat' || method == 'apply' || method == 'version') {
+          var cbLength = collection.length();
+          var cbCount = 0;
+          var nestedCb = function () {
+            cbCount++;
+
+            if (cbCount == cbLength) {
+              next();
+            }
+          }
+          collection.setEndpoint(self)[method].call(collection, value, function (datum) {
+            pw.instruct.perform(this, nested[value.indexOf(datum)], nestedCb);
           });
           return;
         } else if (method == 'attrs') {
           self.performAttr(collection.attrs(), nested);
+          return;
+        } else if (method == 'use') {
+          collection.setEndpoint(self);
+          collection.use(value, next);
           return;
         } else {
           var mutatedViews = collection[method].call(collection, value);
@@ -1559,11 +1832,33 @@ pw.instruct = {
       }
 
       if (nested instanceof Array) {
-        pw.instruct.perform(mutatedViews, nested);
+        pw.instruct.perform(mutatedViews, nested, next);
+        return;
       } else if (mutatedViews) {
         collection = mutatedViews;
       }
-    });
+
+      next();
+    };
+
+    var i = 0;
+    function next() {
+      if (i < instructions.length) {
+        instruct(collection, instructions[i++]);
+      } else {
+        done();
+      }
+    };
+
+    function done() {
+      if (cb) {
+        cb();
+      } else {
+        pw.component.findAndInit(collection.node);
+      }
+    };
+
+    next();
   },
 
   performAttr: function (context, attrInstructions) {
@@ -1618,12 +1913,17 @@ Array.ensure = function (value) {
 
   return value
 }
+
+NodeList.prototype.forEach = Array.prototype.forEach;
 if (!Object.prototype.pairs) {
-  Object.prototype.pairs = function () {
-    Object.keys(this).map(function (key) {
-      [key, this[key]];
-    }, this);
-  };
+  Object.defineProperty(Object.prototype, "pairs", {
+    value: function() {
+      return Object.keys(this).map(function (key) {
+        return [key, this[key]];
+      }, this);
+    },
+    enumerable: false
+  });
 }
 
   if (typeof define === "function" && define.amd) {
