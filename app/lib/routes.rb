@@ -1,49 +1,63 @@
-# For the Wall Me app
+require 'json'
 
-# From a route, we can use the mutable to query for data:
-#  # get all the users
-#  data(:user).all
-#
-#  # get a specific user
-#  data(:user).find(1)
+module Rack
+  class Request
+    attr_accessor :flash
+  end
+end
 
-Pakyow::App.routes do
-  default do
-    redirect router.group(:profile).path(:list)
+def form(request, view, form)
+  puts "FLASH CONTENTS: #{request.flash}"
+  flash = request.flash
+  profile = {}
+
+  if flash and flash["profile"]
+    profile = flash['profile']
   end
 
-  restful :profile, '/profiles' do
-    list do
-      # Building view using data-version in _form.html to display short_form
-      #  unless email lookup can't be found
+  view.partial(form).scope(:profile).apply(profile)
+  view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+end
 
-      #TODO: Handle switching from short form to long if Gravatar can't find info
-      view.partial(:form).scope(:profile).use(:short_form).bind({})
-
-      # This is original view composition without data-versioning
-      # view.partial(:form).scope(:profile).bind({})
-
-      view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+Pakyow::App.routes do
+  fn :flash do
+    if session[:flash]
+      request.flash = JSON.parse(session[:flash])
+      session.delete :flash
     end
+  end
 
-    create do
-      # Getting email prop being submitted in form in profile view
-      profile = params[:profile]
+  get '/', before: [:flash] do
+    form(request, view, :short_form)
+  end
+
+  get '/long_form', before: [:flash] do
+    form(request, view, :long_form)
+  end
+
+  post '/' do
+    profile = params[:profile]
+
+    if profile["firstName"]
+      profile = {email: profile["email"],
+                 objective: profile["objective"],
+                 name: "#{profile["firstName"]} #{profile["lastName"]}",
+                 imgurl: "http://thecatapi.com/api/images/get?format=src&type=gif"}
+
+      data(:profile).create(profile)
+    else
       gravatar = Gravatar.fetch(profile[:email])
 
-      # If API response successful create record; else output error to view
       if gravatar then
         profile.merge! name: gravatar.display_name, imgurl: gravatar.avatar_url
-
         data(:profile).create(profile)
-        redirect router.group(:profile).path(:list)
-
-        #TODO: after record creation, re-autofocus form to email field
       else
-        p "Couldn't find #{profile[:email]}"
-        #TODO: Output error to view
+        session[:flash] = {profile: profile}.to_json
+        redirect '/long_form'
       end
+    end
 
-    end #/create
-  end #/restful
+    redirect '/'
+  end
+
 end #/routes
