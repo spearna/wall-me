@@ -4,6 +4,7 @@ require 'pakyow'
 require 'sequel'
 require 'httparty'
 require 'json'
+require 'csv'
 
 
 Pakyow::App.define do
