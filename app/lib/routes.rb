@@ -63,10 +63,10 @@ Pakyow::App.routes do
   get '/export' do
     # Feature to locally export and save a roster.
     # Grab all Profile entries, build CSV, export to local machine via browser
-    @profiles = Profile.all
+    profiles = Profile.all
     csv_string = CSV.generate do |csv|
          csv << ["Id", "Name", "Email", "Objective"]
-         @profiles.each do |profile|
+         profiles.each do |profile|
            csv << [profile.id, profile.name, profile.email, profile.objective]
          end
     end
