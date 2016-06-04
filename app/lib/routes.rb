@@ -39,7 +39,7 @@ Pakyow::App.routes do
     profile = params[:profile]
 
     if profile["firstName"]
-      profile = {email: profile["email.downcase"],
+      profile = {email: profile["email"],
                  objective: profile["objective"],
                  name: "#{profile["firstName"]} #{profile["lastName"]}",
                  imgurl: "http://thecatapi.com/api/images/get?format=src&type=gif"}
