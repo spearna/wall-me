@@ -6,6 +6,19 @@ module Rack
   end
 end
 
+def form(request, view, form)
+  puts "FLASH CONTENTS: #{request.flash}"
+  flash = request.flash
+  profile = {}
+
+  if flash and flash["profile"]
+    profile = flash['profile']
+  end
+
+  view.partial(form).scope(:profile).apply(profile)
+  view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+end
+
 Pakyow::App.routes do
   fn :flash do
     if session[:flash]
@@ -15,27 +28,11 @@ Pakyow::App.routes do
   end
 
   get '/', before: [:flash] do
-    flash = request.flash
-    profile = {}
-
-    if flash and flash["profile"]
-      profile = flash['profile']
-    end
-    
-    view.partial(:short_form).scope(:profile).apply(profile)
-    view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+    form(request, view, :short_form)
   end
 
   get '/long_form', before: [:flash] do
-    flash = request.flash
-    profile = {}
-
-    if flash and flash["profile"]
-      profile = flash["profile"]
-    end
-
-    view.partial(:long_form).scope(:profile).apply(profile)
-    view.partial(:list).scope(:profile).mutate(:list, with: data(:profile).all).subscribe
+    form(request, view, :long_form)
   end
 
   post '/' do
