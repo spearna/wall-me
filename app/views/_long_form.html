@@ -1,7 +1,17 @@
-<form data-scope="profile" data-ui="mutable" action="/" method="POST">
-  <input data-prop="email" type="email" placeholder="Your Email" required>
-  <input data-prop="objective" type="text" placeholder="Your objective today">
-  <input data-prop="firstName" type="text" placeholder="First Name" autofocus >
-  <input data-prop="lastName" type="text" placeholder="Last Name">
-  <input type="submit" value="Send">
+<form class="form-inline" data-scope="profile" data-ui="mutable" action="/" method="POST">
+  <div class="form-group">
+  	<input class="form-control" data-prop="email" type="email" placeholder="Your Email" autofocus required>
+  </div>
+  <div class="form-group">
+  	<input class="form-control" data-prop="objective" type="text" placeholder="Your objective today">
+  </div>
+  <div class="form-group">
+  	<input class="form-control" data-prop="firstName" type="text" placeholder="First Name" autofocus >
+  </div>
+  <div class="form-group">
+  	<input class="form-control" data-prop="lastName" type="text" placeholder="Last Name">
+  </div>
+  <div class="form-group">
+  	<input class="btn btn-primary" type="submit" value="Send">
+  </div>
 </form>

@@ -1,5 +1,11 @@
-<form data-scope="profile" data-ui="mutable" action="/" method="POST">
-  <input data-prop="email" type="email" placeholder="Your Email" autofocus required>
-  <input data-prop="objective" type="text" placeholder="Your objective today">
-  <input type="submit" value="Send">
+<form class="form-inline" role="form" data-scope="profile" data-ui="mutable" action="/" method="POST">
+  <div class="form-group">
+  	<input class="form-control" data-prop="email" type="email" placeholder="Your Email" autofocus required>
+  </div>
+  <div class="form-group">
+  	<input class="form-control" data-prop="objective" type="text" placeholder="Your objective today">
+  </div>
+  <div class="form-group">
+	<button type="submit" class="btn btn-primary">Submit</button>
+  </div>
 </form>
