@@ -1,0 +1,6 @@
+
+/* While using a fixed Navbar, a top padding is needed to shift the body contents to not be overlapped */
+/* Remove if fixed NavBar is removed. */
+body {
+    padding-top: 60px;
+  }

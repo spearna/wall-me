@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>
     Wall Me
   </title>
 
-  <link rel="stylesheet" type="text/css" href="/pakyow-css/structure.css">
+    <link rel="stylesheet" type="text/css" href="/pakyow-css/structure.css">
   <!-- <link rel="stylesheet" type="text/css" href="/pakyow-css/style.css"> -->
   <link rel="stylesheet" type="text/css" href="/bootstrap-3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/wall-me.css">
 
+  <script src="/bootstrap-3.3.6/js/bootstrap.min.js"></script>
   <script src="/pakyow-js/pakyow.js"></script>
 
   <script src="/pakyow-js/components/fastlink.js"></script>
@@ -19,10 +22,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid col-md-12 col-sm-12 col-xs-12">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#page-top">Wall Me</a>
+<!--         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar2">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button> -->
+      </div>
+<!--       <div id="navbar2" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li class="active"><a href="#">Home</a></li>
+        </ul>
+      </div> -->
+      <!--/.nav-collapse -->
+    </div>
+    <!--/.container-fluid -->
+  </nav>
+
 <body>
-  <!-- <div class="container-1 margin-t"> -->
   <div class="container-fluid margin-t col-md-12 col-sm-12 col-xs-12">
     <!-- @container -->
   </div>
 </body>
 </html>
+
+<!-- <script type="text/javascript">
+  $(function() {
+    
+  $('a[href*=#]:not([href=#])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+      var target = $(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        $('html,body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
+  
+});
+
+  // From http://bootsnipp.com/snippets/featured/header-curtain-effect
+</script> -->
