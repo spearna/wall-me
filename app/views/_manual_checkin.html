@@ -1,0 +1,48 @@
+<h4>Manual Check-In</h4>
+
+<form class="form-inline" role="form" data-scope="profile" data-ui="mutable" action="/" method="POST">
+  <div class="form-group">
+   <input class="input-lg form-control" data-prop="firstName" type="text" placeholder="First Name" autofocus >
+ </div>
+ <div class="form-group">
+   <input class="input-lg form-control" data-prop="lastName" type="text" placeholder="Last Name">
+ </div>
+ <div class="form-group">
+  <input class="input-lg form-control" data-prop="email" type="email" placeholder="Your Email" autofocus required>
+</div>
+<div class="form-group">
+  <button class="input-lg form-control">Next</button>
+</div>
+
+<h4>I Want To: (select one)</h4>
+
+<div class="form-group">
+  <fieldset class="form-group">
+  <div class="btn-group" data-prop="objective" id="objectiveSelect" data-toggle="buttons">
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="new" type="radio">Look Around
+      </label>
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="join_team" type="radio">Join a Team
+      </label>
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="create_team" class="active" type="radio">Create a Team
+      </label>
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="vet_idea" class="active" type="radio">Discuss an Idea
+      </label>
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="gsd" class="active" type="radio">Get S* Done
+      </label>
+      <label class="btn-lg btn btn-default">
+        <input name="objective" value="random" class="active" type="radio">Random
+      </label>
+    </div>
+  </fieldset>
+
+  <div class="form-group">
+    <input class="btn-lg btn btn-primary" type="submit" value="Submit">
+  </div>
+</div>
+
+</form>
