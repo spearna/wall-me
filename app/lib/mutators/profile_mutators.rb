@@ -20,7 +20,4 @@ Pakyow::App.mutators :profile do
     view.apply(data)
   end
 
-  mutator :render_form do |view, data|
-    view.use(data['form_type'] || :short_form).apply(data)
-  end
 end

@@ -22,4 +22,5 @@ Pakyow::App.mutable :profile do
   action :create do |params|
     Profile.create(params)
   end
+
 end
