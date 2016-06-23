@@ -6,6 +6,8 @@ require 'httparty'
 require 'json'
 require 'csv'
 
+require 'pp'
+
 $db = Sequel.sqlite
  
 $db.create_table :profiles do
@@ -77,6 +79,8 @@ end
   # end
 
   # configure :production do
+
+  #   realtime.redis = { url: ENV['REDIS_URL'] }
   #   # suggested production configuration
   #   app.static = true
   #   app.log_output = true
