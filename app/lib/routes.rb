@@ -13,7 +13,7 @@ Pakyow::App.routes do
   end
 
   # setup restful resources for namespace 'profile', while keeping route on default url
-  restful :profile, '/' do
+  restful :profile, '/profiles' do
 
     action :create do
       # create the profile
