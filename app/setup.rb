@@ -22,12 +22,16 @@ end
 
 Pakyow::App.define do
   configure :global do
+    Bundler.require :default, Pakyow::Config.env
+
+    if defined?(Dotenv)
+      env_path = ".env.#{Pakyow::Config.env}"
+      Dotenv.load env_path if File.exist?(env_path)
+      Dotenv.load
+    end
+
     app.name = 'Wall Me'
   end
-
- middleware do |builder|
-   builder.use Rack::Session::Cookie, key: "#{Pakyow::Config.app.name}.session", secret: 'sekret'
- end
 end
 
 
