@@ -4,8 +4,9 @@ Pakyow::App.bindings do
     restful :profile
 
     options :objective do
-      [[:"Look around", "Look around"],
-       [:"Join a team", "Join a team"]]
+      ["Look around",
+       "Join a team"
+      ].map { |x| [x.to_sym, x] }
     end
   end
 
