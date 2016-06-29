@@ -5,7 +5,12 @@ Pakyow::App.bindings do
 
     options :objective do
       ["Look around",
-       "Join a team"
+       "Lead event",
+       "Attend event",
+       "Join a team",
+       "Find a teammate",
+       "Discuss an idea",
+       "Get S* Done"
       ].map { |x| [x.to_sym, x] }
     end # options :objective do
 
