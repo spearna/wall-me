@@ -40,7 +40,7 @@ Pakyow::App.routes do
     csv_string = CSV.generate do |csv|
      csv << ["Id", "First Name", "Last Name", "Email", "Objective"]
      profiles.each do |profile|
-       csv << [profile.id, profile.firstname, profile.lastname, profile.email, profile.objective]
+       csv << [profile.id, profile.firstName, profile.lastName, profile.email, profile.objective]
      end
    end
 

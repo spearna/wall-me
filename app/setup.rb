@@ -34,6 +34,7 @@ Pakyow::App.define do
   end
 
   configure :production do
+    $db = Sequel.connect('DATABASE_URL')
     realtime.redis = { url: ENV['REDISTOGO_URL'] }
     app.log_output = true
   end
