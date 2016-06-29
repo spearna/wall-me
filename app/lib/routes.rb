@@ -38,9 +38,9 @@ Pakyow::App.routes do
     # Grab all Profile entries, build CSV, export to local machine via browser
     profiles = Profile.all
     csv_string = CSV.generate do |csv|
-     csv << ["Id", "Name", "Email", "Objective"]
+     csv << ["Id", "First Name", "Last Name", "Email", "Objective"]
      profiles.each do |profile|
-       csv << [profile.id, profile.name, profile.email, profile.objective]
+       csv << [profile.id, profile.firstname, profile.lastname, profile.email, profile.objective]
      end
    end
 
