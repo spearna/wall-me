@@ -13,10 +13,11 @@ Pakyow::App.routes do
   end
 
   # setup restful resources for namespace 'profile', while keeping route on default url
-  restful :profile, '/profiles' do
+  restful :profile do
 
     action :create do
       # create the profile
+      params[:profile][:imgurl] = "/images/" + random_image
       pp "create the profile"
       pp params[:profile]
       data(:profile).create(params[:profile])
