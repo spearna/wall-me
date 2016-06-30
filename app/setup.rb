@@ -74,7 +74,7 @@ Pakyow::App.define do
    end
 
 
-   realtime.redis = { url: ENV['REDIS_URL'] }
+   realtime.redis = { url: ENV['REDISTOGO_URL'] }
    app.log_output = true
  end
 
