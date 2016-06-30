@@ -71,7 +71,7 @@ Pakyow::App.define do
     #  String :imgurl
     #  String :email
     #  String :objective
-   end
+    # end
 
 
    realtime.redis = { url: ENV['REDISTOGO_URL'] }
