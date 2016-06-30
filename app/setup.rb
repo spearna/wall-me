@@ -64,13 +64,13 @@ Pakyow::App.define do
 
     $db = Sequel.connect(ENV['DATABASE_URL'])
     # $db = Sequel.connect('DATABASE_URL')
-    $db.create_table :profiles do
-     primary_key :id
-     String :firstName
-     String :lastName
-     String :imgurl
-     String :email
-     String :objective
+    # $db.create_table :profiles do
+    #  primary_key :id
+    #  String :firstName
+    #  String :lastName
+    #  String :imgurl
+    #  String :email
+    #  String :objective
    end
 
 
