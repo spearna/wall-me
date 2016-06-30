@@ -39,11 +39,6 @@ Pakyow::App.define do
     app.log_output = true
   end
 
-  middleware do |builder|
-    # TODO: you will most definitely want to change this secret
-    builder.use Rack::Session::Cookie, key: "#{Pakyow::Config.app.name}.session", secret: 'sekret'
-  end
-
 end
 
 
