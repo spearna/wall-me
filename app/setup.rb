@@ -46,14 +46,13 @@ Pakyow::App.define do
  configure :production do
     # suggested production configuration
     app.static = true
+    realtime.redis = { url: ENV['REDISTOGO_URL'] }
     app.log_output = true
     app.auto_reload = false
     app.errors_in_browser = false
 
-    $db = Sequel.connect(ENV['DATABASE_URL'])
-
-    realtime.redis = { url: ENV['REDISTOGO_URL'] }
-    app.log_output = true
+    # $db = Sequel.connect(ENV['DATABASE_URL'])
+    $db = Sequel.connect('postgres://spear:postgres@localhost:5432/postgres')
  end
 
 end
