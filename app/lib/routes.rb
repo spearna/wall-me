@@ -17,7 +17,7 @@ Pakyow::App.routes do
 
     action :create do
       # create the profile
-      params[:profile][:imgurl] = "/images/" + random_image
+      # params[:profile][:imgurl] = "/images/" + random_image
       pp "create the profile"
       pp params[:profile]
       data(:profile).create(params[:profile])
