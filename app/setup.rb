@@ -51,8 +51,8 @@ Pakyow::App.define do
     app.auto_reload = false
     app.errors_in_browser = false
 
-    # $db = Sequel.connect(ENV['DATABASE_URL'])
-    $db = Sequel.connect('postgres://spear:postgres@localhost:5432/postgres')
+     $db = Sequel.connect(ENV['DATABASE_URL'])
+    #$db = Sequel.connect('postgres://spear:postgres@localhost:5432/postgres')
  end
 
 end
