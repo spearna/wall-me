@@ -5,7 +5,19 @@
     <input class="input-lg form-control" data-prop="firstName" type="text" placeholder="First Name" autofocus required>
     <input class="input-lg form-control" data-prop="lastName" type="text" placeholder="Last Name">
     <input class="input-lg form-control" data-prop="email" type="email" placeholder="Your Email" required>
-    <input class="input-lg form-control" data-prop="imgurl" id="file" type="file" accept="image/*">
+    <!-- <input class="input-lg form-control" data-prop="imgurl" id="file" type="file" accept="image/*"> -->
+    
+      <input class="hidden input-lg form-control" id="fileupload" type="file" name="files[]">
+      <label class="btn-lg btn btn-primary" for="fileupload">Choose Image</label>
+      <br>
+      <br>
+      <!-- The global progress bar -->
+      <div id="progress" class="progress">
+          <div class="progress-bar progress-bar-success"></div>
+      </div>
+      <!-- The container for the uploaded files -->
+      <div id="files" class="files" data-prop="image_url"></div>
+      <input type="hidden" id="tempimage" name="tempimage"></input>
 
     <h4>I Want To: (select one)</h4>
 
@@ -19,7 +31,51 @@
 </form>
 
 
+<script src="/js/jquery.min.js"></script>
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="/js/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="/js/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="/js/jQuery-File-Upload/js/jquery.fileupload.js"></script>
 <script type="text/javascript">
+  $(document).ready(function(){
+    console.log("document ready");
+    
+    'use strict';
+    // Change this to the location of your server-side upload handler:
+    // var url = window.location.hostname === 'blueimp.github.io' ?
+    //             '//jquery-file-upload.appspot.com/' : 'server/php/';
+    var url = '/upload/';
+    console.log(url);
+    $('#fileupload').fileupload({
+      type: 'patch',
+      url: url,
+      dataType: 'json',
+      done: function (e, data) {
+        $.each(data.result.files, function (index, file) {
+          $('#fileupload').toggle();
+          $('#files').html("<strong>" + file.name + "</strong> queued for upload. Save profile to upload.");
+          $('#tempimage').val(file.temp);
+          $('#progress .progress-bar').css('width', 0);
+        });
+      },
+      progressall: function (e, data) {
+        var progress = parseInt(data.loaded / data.total * 100, 10);
+        $('#progress .progress-bar').css(
+          'width',
+          progress + '%'
+          );
+      }
+    }).prop('disabled', !$.support.fileInput)
+    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+  });
+</script>
+
+
+
+<!-- <script type="text/javascript">
   function isUploadSupported() {
     if (navigator.userAgent.match(/(Android (1.0|1.1|1.5|1.6|2.0|2.1))|(Windows Phone (OS 7|8.0))|(XBLWP)|(ZuneWP)|(w(eb)?OSBrowser)|(webOS)|(Kindle\/(1.0|2.0|2.5|3.0))/)) {
       return false;
@@ -139,4 +195,4 @@
     }
   });
 }
-</script>
+</script> -->
