@@ -51,8 +51,18 @@ Pakyow::App.define do
     app.auto_reload = false
     app.errors_in_browser = false
 
-     $db = Sequel.connect(ENV['DATABASE_URL'])
+    $db = Sequel.connect(ENV['DATABASE_URL'])
     #$db = Sequel.connect('postgres://spear:postgres@localhost:5432/postgres')
+    $db.run("DROP TABLE IF EXISTS profiles;")
+    $db.create_table :profiles do
+      primary_key :id
+     String :firstName
+     String :lastName
+     String :imgurl
+     String :email
+     String :objective
+    end
+
  end
 
 end
