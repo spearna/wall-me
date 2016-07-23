@@ -65,7 +65,7 @@ Pakyow::App.define do
     #  String :imgurl
     #  String :email
     #  String :objective
-    end
+    # end
 
  end
 
