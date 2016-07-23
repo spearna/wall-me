@@ -53,14 +53,18 @@ Pakyow::App.define do
 
     $db = Sequel.connect(ENV['DATABASE_URL'])
     #$db = Sequel.connect('postgres://spear:postgres@localhost:5432/postgres')
-    $db.run("DROP TABLE IF EXISTS profiles;")
-    $db.create_table :profiles do
-      primary_key :id
-     String :firstName
-     String :lastName
-     String :imgurl
-     String :email
-     String :objective
+
+    # Commenting out table creation. After reset, needs to be uncommented since in setup file.
+    # TODO: Move this to a rake file.
+
+    # $db.run("DROP TABLE IF EXISTS profiles;")
+    # $db.create_table :profiles do
+    #   primary_key :id
+    #  String :firstName
+    #  String :lastName
+    #  String :imgurl
+    #  String :email
+    #  String :objective
     end
 
  end
