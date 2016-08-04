@@ -1,4 +1,13 @@
-A digital sign-in sheet to encourage more collisions at an event. Based on the real-time chat app written using [Pakyow](https://pakyow.org/)!.
+#WHY "Wall-Me"?
+Events should have more than a sign-in sheet to track attendees, they should give something in return. There should be a way to add value by encouraging better collisions of ideas while allowing better insight into the audience.
+
+#HOW Will "Wall-Me" Achieve This?
+##Gamification
+##Data Analytics
+
+
+#WHAT's in "Wall-Me"?
+First, "Wall-Me" is developled using [Pakyow](https://pakyow.org/)!
 
 Wireframe found here:
 http://framebox.org/XZSi
@@ -15,7 +24,7 @@ FEATURES:
 * Objectives allow for identification of complementary attendees
 * [Future] Auto suggest first person to talk to; facilitate connection
 
-
+#EXTRA INFO
 ## Reason for using Pakyow:
 
 PakyowUI brings live updating views to Pakyow apps without moving logic to the
@@ -29,7 +38,7 @@ functionality (without the live updates of course). You get this progressive
 enhancement for free, without thinking about it during development.
 
 
-# Getting Started
+#GETTING STARTED
 
 Make sure you have a reasonably recent version of Ruby installed (> 2.0), along
 with RubyGems and Bundler. Then, install the dependencies:
