@@ -1,7 +1,7 @@
 #WHY "Wall-Me"?
 Events should have more than just a simple sign-in sheet to track attendees, they should give something in return. "Wall-Me" encourages better collisions of ideas for attendees while providing hosts better insight into their audience.
 
-#HOW Will "Wall-Me" Achieve This?
+#How Will "Wall-Me" Achieve This?
 ##Gamification
 - Give awards to repeat attendees. 
 - Auto suggestions of first people to meet.  
@@ -11,8 +11,8 @@ Events should have more than just a simple sign-in sheet to track attendees, the
 - Track attendance over time.
 
 
-#WHAT's in "Wall-Me"?
-First, "Wall-Me" is developled using [Pakyow](https://pakyow.org/)!
+#What's in "Wall-Me"?
+First, "Wall-Me" is developed using [Pakyow](https://pakyow.org/)!
 
 Wireframe found here:
 http://framebox.org/XZSi
