@@ -54,7 +54,7 @@
       done: function (e, data) {
         $.each(data.result.files, function (index, file) {
           $('#fileupload').toggle();
-          $('#files').html("<strong>" + file.name + "</strong> queued for upload. Save profile to upload.");
+          $('#files').html("<strong>" + file.name + "</strong> queued for upload.");
           $('#tempimage').val(file.temp);
           $('#progress .progress-bar').css('width', 0);
         });
