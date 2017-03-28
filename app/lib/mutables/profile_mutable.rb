@@ -15,11 +15,25 @@
 Pakyow::App.mutable :profile do
   model Profile
 
-  query :all do
+  # query :for_all_profiles do
+  #   redis.lrange(:profiles, 0, -1).each_with_index.map { |profile, id|
+  #     {
+  #       id: id + 1,
+  #       profile: profile
+  #     }
+  #   }
+  # end
+
+  # action :create do |params|
+  #   redis.lpush(:profiles, params[:profile])
+  # end
+
+  query :for_all_profiles do
     Profile.order(Sequel.desc(:id)).all
   end
 
   action :create do |params|
     Profile.create(params)
   end
+
 end

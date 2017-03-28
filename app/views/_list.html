@@ -1,42 +1,51 @@
-<div class="row margin" style="margin-top: 20px;">
+<hr>
+<h4>See Who's Here:</h4>
 
-    <div data-scope="profile">
+<div class="row margin">
 
-      <div class="col-md-6 col-sm-6 col-xs-12">
-        <div class="well well-sm">
-          <div class="media">
+  <div data-scope="profile">
 
-            <a class="pull-left" href="#">
-              <img class="media-object dp img-circle" data-prop="imgurl" style="width:90px; height:90px">
-            </a>
+    <div class="col-md-6 col-sm-6 col-xs-12">
+      <div class="well well-sm">
+        <div class="media">
 
-            <div class="media-body">
-              <h3 class="media-heading" data-prop="name">Name</h3>
-              <p>
-                <label>
-                  OBJECTIVE:
-                </label>
-                <span data-prop="objective">
-                  Objective Goes Here
-                </span>
-              </p>
-            </div>
-
+          <div class="pull-left">
+            <!-- <a class="pull-left" href="#"> -->
+            <img class="media-object dp img-circle" data-prop="imgurl" style="width:90px; height:90px">
+            <!-- </a> -->
           </div>
-        </div>
 
+          <div class="media-body">
+            <h3 class="media-heading">
+              <span data-prop="firstName">First Name</span>&nbsp;<span data-prop="lastName">Last Name</span> 
+            </h3>
+            <p>
+              <label>
+              I'm Here To:
+              </label>
+              <span data-prop="objective">
+                Objective Goes Here
+              </span>
+            </p>
+          </div>
+
+        </div>
       </div>
 
     </div>
 
+  </div>
+
 </div>
 
 <!-- Default message if no data to display -->
-<div data-scope="profile" data-version="empty">
-  <hr>
-  <p>
-    No one is here :( <br> Let's change that ...
-  </p>
+<div class="col-md-6 col-sm-6 col-xs-12">
+  <div data-scope="profile" data-version="empty">
+    <hr>
+    <p>
+      No one is here :( <br> Let's change that ...
+    </p>
+  </div>
 </div>
 
-</div>
+<!-- </div> -->

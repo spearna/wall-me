@@ -1,0 +1,197 @@
+<h4>Manual Check-In</h4>
+
+<form class="form-inline" role="form" data-scope="profile" data-ui="mutable">
+  <div class="form-group">
+    <input class="input-lg form-control" data-prop="firstName" type="text" placeholder="First Name" autofocus required>
+    <input class="input-lg form-control" data-prop="lastName" type="text" placeholder="Last Name">
+    <input class="input-lg form-control" data-prop="email" type="email" placeholder="Your Email" required>
+    <!-- <input class="input-lg form-control" data-prop="imgurl" id="file" type="file" accept="image/*"> -->
+    <input class="hidden input-lg form-control" id="fileupload" type="file" name="files[]">
+    <label class="btn-lg btn btn-primary" for="fileupload">Choose Image</label>
+    <br>
+    <br>
+    <!-- The global progress bar -->
+    <div id="progress" class="progress">
+        <div class="progress-bar progress-bar-success"></div>
+    </div>
+    <!-- The container for the uploaded files -->
+    <div id="files" class="files" data-prop="image_url"></div>
+    <input type="hidden" id="tempimage" name="tempimage"></input>
+
+    <h4>I Want To: (select one)</h4>
+
+    <select class="input-lg form-control" data-prop="objective">
+      <option>asdf</option>
+    </select>
+
+    <button class="btn-lg btn btn-primary" type="submit" value="Submit">Submit</button>
+  </div>
+
+</form>
+
+
+<script src="/js/jquery.min.js"></script>
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="/js/jQuery-File-Upload/js/vendor/jquery.ui.widget.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="/js/jQuery-File-Upload/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="/js/jQuery-File-Upload/js/jquery.fileupload.js"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+    console.log("document ready");
+    
+    'use strict';
+    // Change this to the location of your server-side upload handler:
+    // var url = window.location.hostname === 'blueimp.github.io' ?
+    //             '//jquery-file-upload.appspot.com/' : 'server/php/';
+    var url = '/upload/';
+    console.log(url);
+    $('#fileupload').fileupload({
+      type: 'patch',
+      url: url,
+      dataType: 'json',
+      done: function (e, data) {
+        $.each(data.result.files, function (index, file) {
+          $('#fileupload').toggle();
+          $('#files').html("<strong>" + file.name + "</strong> queued for upload.");
+          $('#tempimage').val(file.temp);
+          $('#progress .progress-bar').css('width', 0);
+        });
+      },
+      progressall: function (e, data) {
+        var progress = parseInt(data.loaded / data.total * 100, 10);
+        $('#progress .progress-bar').css(
+          'width',
+          progress + '%'
+          );
+      }
+    }).prop('disabled', !$.support.fileInput)
+    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+
+  });
+</script>
+
+
+
+<!-- <script type="text/javascript">
+  function isUploadSupported() {
+    if (navigator.userAgent.match(/(Android (1.0|1.1|1.5|1.6|2.0|2.1))|(Windows Phone (OS 7|8.0))|(XBLWP)|(ZuneWP)|(w(eb)?OSBrowser)|(webOS)|(Kindle\/(1.0|2.0|2.5|3.0))/)) {
+      return false;
+    }
+    var elem = document.createElement('input');
+    elem.type = 'file';
+    return !elem.disabled;
+  };
+</script>
+
+<script type="text/javascript">
+  if (window.File && window.FileReader && window.FormData) {
+    var $inputField = $('#file');
+
+    $inputField.on('change', function (e) {
+      var file = e.target.files[0];
+
+      if (file) {
+        if (/^image\//i.test(file.type)) {
+          readFile(file);
+        } else {
+          alert('Not a valid image!');
+        }
+      }
+    });
+  } else {
+    alert("File upload is not supported!");
+  }
+</script>
+
+<script type="text/javascript">
+  function readFile(file) {
+    var reader = new FileReader();
+
+    reader.onloadend = function () {
+      processFile(reader.result, file.type);
+    }
+
+    reader.onerror = function () {
+      alert('There was an error reading the file!');
+    }
+
+    reader.readAsDataURL(file);
+  }
+</script>
+
+<script type="text/javascript">
+  function processFile(dataURL, fileType) {
+  var maxWidth = 800;
+  var maxHeight = 800;
+
+  var image = new Image();
+  image.src = dataURL;
+
+  image.onload = function () {
+    var width = image.width;
+    var height = image.height;
+    var shouldResize = (width > maxWidth) || (height > maxHeight);
+
+    if (!shouldResize) {
+      sendFile(dataURL);
+      return;
+    }
+
+    var newWidth;
+    var newHeight;
+
+    if (width > height) {
+      newHeight = height * (maxWidth / width);
+      newWidth = maxWidth;
+    } else {
+      newWidth = width * (maxHeight / height);
+      newHeight = maxHeight;
+    }
+
+    var canvas = document.createElement('canvas');
+
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    var context = canvas.getContext('2d');
+
+    context.drawImage(this, 0, 0, newWidth, newHeight);
+
+    dataURL = canvas.toDataURL(fileType);
+
+    sendFile(dataURL);
+  };
+
+  image.onerror = function () {
+    alert('There was an error processing your file!');
+  };
+}
+</script>
+
+<script type="text/javascript">
+  function sendFile(fileData) {
+  var formData = new FormData();
+
+  formData.append('imageData', fileData);
+
+  $.ajax({
+    type: 'POST',
+    url: '/your/upload/url',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+      if (data.success) {
+        alert('Your file was successfully uploaded!');
+      } else {
+        alert('There was an error uploading your file!');
+      }
+    },
+    error: function (data) {
+      alert('There was an error uploading your file!');
+    }
+  });
+}
+</script> -->

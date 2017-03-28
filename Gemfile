@@ -8,6 +8,8 @@ gem "json"
 gem "pg"
 gem "shotgun"
 gem "dotenv"
+gem 'aws-sdk', '~> 2'
+gem 'mini_magick'
 
 group :development do
   gem "sqlite3"
